@@ -1,13 +1,5 @@
 # DC/OS on AWS with Terraform
 
-The purpose of this tool is to automate most of the manual efforts of managing and maintaining distributed systems. This project was has a few important goals in mind since the inception of the project.
-
-Goal: Make a modular and reusable script to easily decouple DC/OS on various OS and cloud providers to easily install, upgrade and modify in-place.
-
-The dcos-core module has all the DC/OS unique install and upgrade instructions. These instructions are taken from the mesosphere.io and dcos.io documentation and modified a bit to make it allowed to be automated and templated by terraform. The dcos-core module was written in bash to allow flexibility to run on any linux operating system. It also has templates in the scripts to leverage the power of terraform to manage your cluster with very few commands. 
-
-If you want to use this in your own environment, feel free to fork this and customize it to your specifications. This will be built so everybody can take advantage of deploying and manage DC/OS clusters.
-
 ## Getting Started
 
 ### Install Terraform
@@ -25,6 +17,16 @@ If you want to leverage the terraform installer, feel free to check out https://
 ##### AWS
 
 You can use an AWS credentials file to specify your credentials. The default location is `$HOME/.aws/credentials` on Linux and OS X, or `"%USERPROFILE%\.aws\credentials"` for Windows users.
+
+**Configure your AWS Keys**
+
+In the `variable.tf` there is a `key_name` variable. This key must be added to your host machine running your terraform script as it will be used to log into the machines to run setup scripts. The default is `default`. You can find aws documentation that talks about this [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#how-to-generate-your-own-key-and-import-it-to-aws)
+
+When you have your key available, you can use ssh-add.
+
+```bash
+ssh-add ~/.ssh/path_to_you_key.pem
+```
 
 **Pull down the DC/OS terraform scripts below**
 
@@ -100,58 +102,6 @@ terraform apply -var dcos_version=1.9.0
 terraform apply
 ```
 
-## Adding or Removing DC/OS Agents
-
-If you would like to add more or remove (private) agents or public agents from your cluster, you can do so by telling terraform your desired state and it will make sure it gets you there. For example, if I have 2 private agents and 1 public agent in my `-var-file` I can always override that flag by specifying the `-var` flag. It has higher priority than the `-var-file`. 
-
-### Adding Agents
-
-```bash
-terraform apply -var-file desired_cluster_profile --var num_of_private_agents=5 --var num_of_public_agents=3
-```
-
-### Removing Agents
-
-```bash
-terraform apply -var-file desired_cluster_profile --var num_of_private_agents=1 --var num_of_public_agents=1
-```
-
-**Important**: Always remember to save your desired state in your `desired_cluster_profile`
-
-## Redeploy an existing Agent
-
-If you wanted to redeploy a problematic agent for whatever reason,(ie. storage filled up, not responsive, etc), you tell terraform to redeploy during the next cycle. 
-
-
-### Private Agents
-
-**Taint Private Agent**
-
-```bash
-terraform taint aws_instance.agent.0 # The number represents the agent in the list 
-```
-
-**Redeploy Agent**
-
-```bash
-terraform apply -var-file desired_cluster_profile
-```
-
-
-### Public Agents
-
-**Taint Private Agent**
-
-```bash
-terraform taint aws_instance.public-agent.0 # The number represents the agent in the list 
-```
-
-**Redeploy Agent**
-
-```bash
-terraform apply -var-file desired_cluster_profile
-```
-
 ## Upgrading DC/OS  
 
 You can upgrade your DC/OS cluster with a single command. This terraform script was built to perform installs and upgrade from the inception of this project. With the upgrade procedures below, you can also have finer control on how masters or agents upgrade at a given time. This will give you the ability to change the parallelism of master or agent upgrades.
@@ -223,6 +173,59 @@ terraform apply --var os=coreos_1235.9.0 --var dcos_version=1.8.8  --var state=u
   terraform apply --var dcos_version=1.9.0 --var state=upgrade --var dcos_security=strict
   ```
 
+## Maintenance
+
+If you would like to add more or remove (private) agents or public agents from your cluster, you can do so by telling terraform your desired state and it will make sure it gets you there. For example, if I have 2 private agents and 1 public agent in my `-var-file` I can always override that flag by specifying the `-var` flag. It has higher priority than the `-var-file`. 
+
+### Adding Agents
+
+```bash
+terraform apply -var-file desired_cluster_profile --var num_of_private_agents=5 --var num_of_public_agents=3
+```
+
+### Removing Agents
+
+```bash
+terraform apply -var-file desired_cluster_profile --var num_of_private_agents=1 --var num_of_public_agents=1
+```
+
+**Important**: Always remember to save your desired state in your `desired_cluster_profile`
+
+## Redeploy an existing Agent
+
+If you wanted to redeploy a problematic agent, (ie. storage filled up, not responsive, etc), you can tell terraform to redeploy during the next cycle. 
+
+
+### Private Agents
+
+**Taint Private Agent**
+
+```bash
+terraform taint aws_instance.agent.0 # The number represents the agent in the list 
+```
+
+**Redeploy Agent**
+
+```bash
+terraform apply -var-file desired_cluster_profile
+```
+
+
+### Public Agents
+
+**Taint Private Agent**
+
+```bash
+terraform taint aws_instance.public-agent.0 # The number represents the agent in the list 
+```
+
+**Redeploy Agent**
+
+```bash
+terraform apply -var-file desired_cluster_profile
+```
+
+
 
   # Roadmaps
 
@@ -237,4 +240,5 @@ terraform apply --var os=coreos_1235.9.0 --var dcos_version=1.8.8  --var state=u
   - [ ] Support for RHEL
   - [ ] Secondary support for specific versions of RHEL
   - [ ] Multi AZ Support
+
 
