@@ -53,6 +53,8 @@ terraform init github.com/bernadinm/terraform-dcos/aws
 terraform plan --var os=coreos_835.13.0
 ```
 
+Once `terraform plan` completes successfully you can deploy it by simply doing replacing `plan` with `apply`. Read more for more information.
+
 ## Pro-tip: Use Terraform’s -var-file
 
 When reading the commands below relating to installing and upgrading, it may be easier for you to keep all these flags in a file instead. This way you can make a change to the file and it will persist when you do other commands to your cluster in the future.
