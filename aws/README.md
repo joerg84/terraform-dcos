@@ -1,4 +1,4 @@
-# Deploy DC/OS using Terraform on AWS
+# DC/OS on AWS with Terraform
 
 The purpose of this tool is to automate most of the manual efforts of managing and maintaining distributed systems. This project was has a few important goals in mind since the inception of the project.
 
